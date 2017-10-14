@@ -21,9 +21,11 @@ def send_tx():
         pri_key, pub_key = key.get_key()
         tx = transaction.create_tx(pub_key, pri_key, message)
         transaction.send_tx(tx)
-        back()
-    else:
-        exec_menu(choice)
+
+    #    back()
+    #else:
+
+    exec_menu(choice)
 
     return
 
@@ -37,14 +39,14 @@ def create_block_menu():
 def show_node_list():
     print("\nNode List\n")
 
-    #list_all_node()
+    list_all_node()
     back()
 
 #menu 4 : show transaction list
 def show_transaction_list():
     print("\nTransaction List\n")
 
-    #list_all_transaction()
+    list_all_transaction()
     back()
 
 # menu 5

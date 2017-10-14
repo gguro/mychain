@@ -6,6 +6,8 @@ import time
 
 import zmq
 
+from app import node
+
 
 PING_PORT_NUMBER = 9999
 PING_MSG_SIZE = 1
@@ -22,7 +24,6 @@ def stop():
 
 def start():
     def find_node_thread():
-
         # UDP 소켓 생성
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
@@ -42,6 +43,8 @@ def start():
         while is_running:
             # 타이머 설정
             timeout = ping_at - time.time()
+
+
             if timeout < 0:
                 timeout = 0
             try:
@@ -50,13 +53,17 @@ def start():
                 print ("interrupted")
                 break
 
-            # ping 으로부터 응답이 온느 경우 노드 추가
+            # ping 으로부터 응답이 오는 경우 노드 추가
             if sock.fileno() in events:
                 msg, addrinfo = sock.recvfrom(PING_MSG_SIZE)
                 ip = addrinfo[0]
 
                 print("ping received from " + ip)
+
                 # 노드 리스트에 추가
+                # 자기 자신은 제외시켜야 함 (추후)
+                n = node.Node(ip)
+                node.add_node(n)
 
             # 일정 주기 마다 브로드캐스트로 ping
             if time.time() >= ping_at:

@@ -1,12 +1,20 @@
-import json
+import traceback
 
 from socket import *
 
-
+from app import transaction
+from app.transaction import Transaction
 
 is_running = True
 
+def stop():
+    global is_running
+    is_running = False
+
+
 def start(thread_name, ip_address, port):
+    import json
+
     addr = (ip_address, port)
     buf_size = 1024
 
@@ -29,10 +37,29 @@ def start(thread_name, ip_address, port):
                 # 수신된 데이터가 없는 경우
                 if (len(data) == 0):
                     break
+
                 print("data received...")
-                print(data)
+
+                # json 형태의 데이터를 dict 타입으로 변경
+                data_json_obj = json.loads(data)
+
+                # Transaction을 받은 경우
+                if data_json_obj['type'] == 'T':
+                    print ("Received transaction")
+                    print (data_json_obj)
+
+                    # dict 데이터로부터 transaction 객체 생성
+                    tx = Transaction().from_json(data_json_obj)
+
+                    # transaction 추가
+                    transaction.add_transaction(tx)
+
+                # Block 을 수신한 경우
+                ##### 추가
+
             except:
                 print("recv error...")
+                traceback.print_exc()
                 break
 
     tcp_socket.close()

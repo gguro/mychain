@@ -1,7 +1,8 @@
 
 from app import *
-from app import util, key
+from app import util, key, node, transaction
 from app.communicator import receiver, sender
+from app.node import Node
 
 
 listen_thread = None
@@ -26,8 +27,27 @@ def stop_node():
     listen_thread.join()
 
 def set_my_node():
-    key.generate_key()
     print("Set my node")
+
+    my_node = Node(util.get_ip_address('en0'))
+    pri_key, pub_key = key.get_key()
+
+    # key 가 없으면 생성
+    if(pri_key == ''):
+        key.generate_key()
+
+    node.add_node(my_node)
+
+
+def list_all_node():
+    print ("=== list all nodes ===")
+    for n in node.get_all():
+        print(n)
+
+def list_all_transaction():
+    print ("=== list all transactions ===")
+    for t in transaction.get_transactions():
+        print (t)
 
 
 
