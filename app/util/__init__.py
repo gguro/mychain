@@ -1,6 +1,11 @@
 import netifaces
 import socket
 
+import os
+from configparser import ConfigParser
+
+config = ConfigParser()
+
 
 def get_ip_address(ifname):
 	import platform
@@ -13,3 +18,18 @@ def get_ip_address(ifname):
 	else:
 		netifaces.ifaddresses(ifname)
 		return netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
+
+
+def load_config_file(conf_file):
+	global config
+
+	if os.path.exists(conf_file) == False:
+		raise Exception("%s file does not exist\n") % conf_file
+
+	config.read(conf_file)
+
+
+def get_config_item(section, item):
+	global config
+
+	return config.get(section, item)

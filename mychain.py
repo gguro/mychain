@@ -1,10 +1,11 @@
 
 from app import *
-from app import key, communicator, transaction
+from app import key, communicator, transaction, util
 
 
 communicator.start()
 initiate_node(3000)
+
 
 
 # menu 1 : send_tx()
@@ -19,6 +20,10 @@ def send_tx():
     if choice != '9' or choice != '0':
         message = choice
         pri_key, pub_key = key.get_key()
+        if (pri_key == ''):
+            print("Invalid private key...")
+            back()
+
         tx = transaction.create_tx(pub_key, pri_key, message)
         transaction.send_tx(tx)
 
@@ -35,12 +40,14 @@ def create_block_menu():
     create_block()
     back()
 
+
 # menu 3 : show node list
 def show_node_list():
     print("\nNode List\n")
 
     list_all_node()
     back()
+
 
 #menu 4 : show transaction list
 def show_transaction_list():
@@ -49,11 +56,17 @@ def show_transaction_list():
     list_all_transaction()
     back()
 
+
 # menu 5
 def show_block_list():
     print("\nBlock list\n")
 
-    #list_all_block()
+    list_all_block()
+    back()
+
+# menu 6
+    print("\nLoad configs")
+    load_configs()
     back()
 
 
@@ -88,6 +101,7 @@ def main_menu():
     print("3. Show node list")
     print("4. Show transactionlist")
     print("5. Show block list")
+    print("6. Load Config")
 
     print("\n0. Quit\n")
     choice = input(" >> ")
@@ -103,7 +117,9 @@ menu_actions = {
     '3' : show_node_list,
     '4' : show_transaction_list,
     '5' : show_block_list,
-    '6' : back,
+    '6' : load_configs,
+
+    '-' : back,
     '0' : terminate
 }
 
