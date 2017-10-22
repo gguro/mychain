@@ -1,23 +1,18 @@
 import json
 
-from dateutil import parser
-
-from app import util
-
 block_list = []
 
 class Block():
     type = ''
-    prev_block_id = ''
+    prev_block_id = 0
     prev_block_hash = ''
-    tx_list = ''
+    block_id = 0;
     merkle_root = ''
-    time_stamp = ''
-    block_id = ''
+    # time_stamp = ''
     block_hash = ''
     nonce = ''
-    block_info = ''
-    block_miner = ''
+    difficulty = 0
+    tx_list = ''
 
     def __init__(self):
         self.type = 'B'
@@ -28,22 +23,33 @@ class Block():
     def to_json(self):
         return json.dumps({
             'type': self.type,
-            'time_stamp': self.time_stamp.strftime('%Y%m%d%H%M%S'),
             'prev_block_id': self.prev_block_id,
             'prev_block_hash': self.prev_block_hash,
+            'block_id': self.block_id,
             'merkle_root': self.merkle_root,
-            'block_hash': self.block_hash,
+            'difficulty:': self.difficulty,
             'nonce': self.nonce,
-            'block_id': self.block_id
+
+            'block_hash': self.block_hash,
+            'tx_list': self.tx_list
         })
 
     def from_json(self, dictionary):
         for key in dictionary:
             setattr(self, key, dictionary[key])
 
-        self.time_stamp = parser.parse(self.time_stamp)
         return self
 
+    def getheader_json(self):
+        return json.dumps({
+            'type': self.type,
+            'prev_block_id': self.prev_block_id,
+            'prev_block_hash': self.prev_block_hash,
+            'block_id': self.block_id,
+            'merkle_root': self.merkle_root,
+            'difficulty': self.difficulty,
+            'nonce': self.nonce
+        })
 
 def count():
     return len(block_list)
@@ -53,7 +59,7 @@ def get_all_block():
     return block_list
 
 
-def create_block(block):
+def append_block(block):
     block_list.append(block)
 
 
@@ -68,16 +74,17 @@ def create_genesis_block():
     '''
 
     b = Block()
+    b.prev_block_id = 0
+    b.prev_block_hash = 'prev_block_hash'
+    b.block_id = 1
+    b.merkle_root = 'merkle_root'
+    b.block_hash = 'block_hash'
+    b.difficulty = 0
+    b.nonce = 'nonce'
+    b.tx_list = []
 
-    b.prev_block_id = 'B000000000000'
-    b.prev_block_hash = '0'
-    b.block_id = 'B000000000000'
-    b.merkle_root = 'mychain'
-    b.block_hash = 'mychain'
-    b.nonce = 2010101010
-
+    append_block(b)
     return b
-
 
 
 def get_last_block():

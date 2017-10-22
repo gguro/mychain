@@ -4,6 +4,7 @@ from socket import *
 
 from app import transaction
 from app.transaction import Transaction
+from app.block import Block, append_block
 
 is_running = True
 
@@ -16,7 +17,7 @@ def start(thread_name, ip_address, port):
     import json
 
     addr = (ip_address, port)
-    buf_size = 1024
+    buf_size = 10240
 
     # 소켓 생성 및 바인딩
     tcp_socket = socket(AF_INET, SOCK_STREAM)
@@ -54,8 +55,15 @@ def start(thread_name, ip_address, port):
                     # transaction 추가
                     transaction.add_transaction(tx)
 
-                # Block 을 수신한 경우
-                ##### 추가
+                elif data_json_obj['type'] == 'B':
+                    print ("block received...")
+                    # 기존 transacion 삭제
+                    transaction.remove_all()
+
+                    #블록 추가
+                    received_block = Block().from_json(data_json_obj)
+
+                    append_block(received_block)
 
             except:
                 print("recv error...")

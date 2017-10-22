@@ -1,13 +1,15 @@
 import os
 import datetime
 
+
 from app import *
 from app import util, key, node, transaction
 
 from app.communicator import receiver, sender
 from app.node import Node
 from app.block import Block
-
+from app.consensus.merkle_tree import merkle_tree
+from app.consensus.pow import proof_of_work
 
 listen_thread = None
 BASE_PATH = os.getcwd()
@@ -21,8 +23,6 @@ def initiate_node(*args):
 
     print("Start node")
     start_node()
-
-
 
 
 def start_node():
@@ -64,27 +64,16 @@ def list_all_transaction():
         print (t)
 
 
-
-
 def create_block():
 
+    diff_bits = 5;
     transactions = transaction.get_transactions()
 
-    #transaction이 없을 경우 block을 생성하지 않음
-    if(len(transactions) == 0):
+    # transaction이 없을 경우 block을 생성하지 않음
+    if (len(transactions) == 0):
         print("No transactions...")
         return
 
-    # dummy block code
-
-    _block = Block()
-    _block.time_stamp = datetime.datetime.now()
-    block.create_block(_block)
-    sender.send_to_all_node((_block.to_json()), except_my_node=False) # 추후 True로 바꿔야 함
-
-
-
-'''
     # 내 node가 가지고 있는 마지막 블럭
     last_block = block.get_last_block()
 
@@ -96,32 +85,38 @@ def create_block():
     # transaction 으로부터 merkle root 생성
     merkle_root = merkle_tree(transactions_str)
 
-    # block정보에 merkle root 할당
-    block_info = merkle_root
 
     # block 새로 생성
     _block = Block()
 
     # 마지막 블록이 있는 경우
     if last_block:
-        # block 정보에 마지막 블록의 해쉬를 더함
-        block_info += last_block.block_hash
+
+        # last bock 에 대한 정보 저장
+        _block.prev_block_id = last_block.block_id
+        _block.prev_block_hash = last_block.block_hash
+
+        # 작업 증명을 위해 nonce값과 결과 생성
+        _block.block_id = last_block.block_id + 1
+        _block.merkle_root = merkle_root
+        _block.difficulty = diff_bits
+
+        block_header = _block.getheader_json()
+        hash_result, nonce = proof_of_work(block_header, diff_bits)
 
         # block 정보
-        _block.block_has = hash_result
+        _block.block_hash = hash_result
         _block.nonce = nonce
-        _block.block_info = block_info
-        _block.time_stamp = datetime.datetime.now()
+        _block.tx_list = transactions_str
 
         # 내 node에 block 저장
-        block.create_block(_block)
+        block.append_block(_block)
 
         # 내 node가 가지고 있는 transaction 삭제
         transaction.remove_all()
 
         # 나머지 node에게 block 전송
         sender.send_to_all_node((_block.to_json()), except_my_node=True)
-    '''
 
 
 def list_all_block():
